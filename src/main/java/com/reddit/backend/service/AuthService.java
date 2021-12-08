@@ -1,5 +1,7 @@
 package com.reddit.backend.service;
 
+import com.reddit.backend.dto.AuthResponse;
+import com.reddit.backend.dto.LoginRequest;
 import com.reddit.backend.dto.RegisterRequest;
 import com.reddit.backend.exception.ActivationException;
 import com.reddit.backend.model.AccountVerificationToken;
@@ -7,7 +9,12 @@ import com.reddit.backend.model.NotificationEmail;
 import com.reddit.backend.model.User;
 import com.reddit.backend.repository.TokenRepository;
 import com.reddit.backend.repository.UserRepository;
+import com.reddit.backend.security.JWTProvider;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +34,8 @@ public class AuthService {
     TokenRepository tokenRepository;
     MailService mailService;
     MailBuilder mailBuilder;
+    AuthenticationManager authenticationManager;
+    JWTProvider jwtProvider;
 
     @Transactional
     public void register(RegisterRequest registerRequest) {
@@ -44,6 +53,15 @@ public class AuthService {
         String message = mailBuilder.build("Welcome to React-Spring-Reddit Clone. " +
                 "Please visit the link below to activate you account : " + EMAIL_ACTIVATION + "/" + token);
         mailService.sendMail(new NotificationEmail("Please Activate Your Account", user.getEmail(), message));
+    }
+
+    public AuthResponse login(LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(), loginRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String authToken = jwtProvider.generateToken(authentication);
+        return new AuthResponse(authToken, loginRequest.getUsername());
     }
 
     private String encodePassword(String password) {
