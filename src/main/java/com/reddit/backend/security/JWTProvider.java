@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
@@ -21,8 +22,8 @@ public class JWTProvider {
     public void init() {
         try {
             keyStore = KeyStore.getInstance("JKS");
-            InputStream resourceStream = getClass().getResourceAsStream("/keystore.jks");
-            keyStore.load(resourceStream, "password".toCharArray());
+            keyStore.load(new FileInputStream("/home/kamran/Downloads/backend/keystore.jks"), "kamran".toCharArray());
+            System.out.println();
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException exception) {
             throw new ActivationException("Exception occurred while loading keystore");
         }
@@ -35,7 +36,8 @@ public class JWTProvider {
 
     private PrivateKey getPrivateKey() {
         try {
-            return (PrivateKey) keyStore.getKey("alias", "password".toCharArray());
+            PrivateKey key = (PrivateKey) keyStore.getKey("alias", "kamran".toCharArray());
+            return key;
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException ex) {
             throw new ActivationException("Error occurred while retrieving public key");
         }
