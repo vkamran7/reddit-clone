@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class PostRequest {
 
     private Long postId;
-    private String postTitleId;
+    private String postTitle;
     private String url;
     private String description;
     private String subredditName;

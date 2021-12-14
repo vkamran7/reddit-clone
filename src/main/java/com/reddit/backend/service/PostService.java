@@ -58,7 +58,7 @@ public class PostService {
         Subreddit subreddit = subredditRepository.findByName(postRequest.getSubredditName())
                 .orElseThrow(() -> new SubredditNotFoundException(postRequest.getSubredditName()));
         return Post.builder()
-                .postTitle(postRequest.getPostTitleId())
+                .postTitle(postRequest.getPostTitle())
                 .url(postRequest.getUrl())
                 .description(postRequest.getDescription())
                 .voteCount(0)
