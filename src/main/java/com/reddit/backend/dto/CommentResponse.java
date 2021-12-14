@@ -18,5 +18,5 @@ public class CommentResponse {
     private String text;
     private Long postId;
     private Instant creationDate;
-    private User user;
+    private String username;
 }
