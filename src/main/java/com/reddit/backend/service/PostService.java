@@ -47,7 +47,7 @@ public class PostService {
                 .username(post.getUser().getUsername())
                 .subredditName(post.getSubreddit().getName())
                 .voteCount(post.getVoteCount())
-                .commentCount(commentRepository.findByPost(post).size())
+                .commentCount(commentRepository.findAllByPost(post).size())
                 .duration(TimeAgo.using(post.getCreationDate().toEpochMilli()))
                 .upVote(checkVoteType(post, VoteType.UPVOTE))
                 .downVote(checkVoteType(post, VoteType.DOWNVOTE))
