@@ -41,9 +41,9 @@ public class CommentService {
 
     private Comment mapToComment(CommentRequest commentRequest) {
         User user = authService.getCurrentUser();
-        Post post = postRepository.findById(commentRequest.getPost().getPostId())
+        Post post = postRepository.findById(commentRequest.getPostId())
                 .orElseThrow(() ->
-                        new PostNotFoundException("Post not found with id: " + commentRequest.getPost().getPostId()));
+                        new PostNotFoundException("Post not found with id: " + commentRequest.getPostId()));
         return Comment.builder()
                 .text(commentRequest.getText())
                 .user(user)
