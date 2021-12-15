@@ -9,6 +9,8 @@ import com.reddit.backend.exception.UserNotFoundException;
 import com.reddit.backend.model.*;
 import com.reddit.backend.repository.*;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,11 +74,8 @@ public class PostService {
         return mapToResponse(postRepository.save(mapToPost(postRequest)));
     }
 
-    public List<PostResponse> getAllPost() {
-        return StreamSupport
-                .stream(postRepository.findAll().spliterator(), false)
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public Page<PostResponse> getAllPost(Integer page) {
+        return postRepository.findAll(PageRequest.of(page, 100)).map(this::mapToResponse);
     }
 
     public PostResponse findById(Long id) {
@@ -85,19 +84,16 @@ public class PostService {
         return mapToResponse(post);
     }
 
-    public List<PostResponse> getPostsBySubredditId(Long id) {
+    public Page<PostResponse> getPostsBySubredditId(Long id, Integer page) {
         Subreddit subreddit = subredditRepository.findById(id)
                 .orElseThrow(() -> new SubredditNotFoundException("Subreddit not found with id: " + id));
-        return subreddit.getPosts().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return postRepository.findAllBySubreddit(subreddit, PageRequest.of(page, 100)).map(this::mapToResponse);
     }
 
-    public List<PostResponse> getPostsByUsername(String username) {
+    public Page<PostResponse> getPostsByUsername(String username, Integer page) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
-        return postRepository.findByUser(user).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return postRepository.findByUser(user, PageRequest.of(page, 100))
+                .map(this::mapToResponse);
     }
 }
