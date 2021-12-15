@@ -1,5 +1,6 @@
 package com.reddit.backend.service;
 
+import com.reddit.backend.exception.InvalidRefreshTokenException;
 import com.reddit.backend.model.RefreshToken;
 import com.reddit.backend.repository.RefreshTokenRepository;
 import lombok.AllArgsConstructor;
@@ -22,9 +23,9 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(refreshToken);
     }
 
-    void validateToken(String token) throws Exception {
+    public void validateToken(String token)  {
         refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new Exception("Invalid Refresh Token"));
+                .orElseThrow(() -> new InvalidRefreshTokenException("Invalid Refresh Token"));
     }
 
     public void deleteRefreshToken(String token) {

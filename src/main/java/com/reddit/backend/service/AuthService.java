@@ -2,6 +2,7 @@ package com.reddit.backend.service;
 
 import com.reddit.backend.dto.AuthResponse;
 import com.reddit.backend.dto.LoginRequest;
+import com.reddit.backend.dto.RefreshTokenRequest;
 import com.reddit.backend.dto.RegisterRequest;
 import com.reddit.backend.exception.ActivationException;
 import com.reddit.backend.model.AccountVerificationToken;
@@ -38,6 +39,7 @@ public class AuthService {
     MailBuilder mailBuilder;
     AuthenticationManager authenticationManager;
     JWTProvider jwtProvider;
+    RefreshTokenService refreshTokenService;
 
     @Transactional
     public void register(RegisterRequest registerRequest) {
@@ -72,7 +74,22 @@ public class AuthService {
                         loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String authToken = jwtProvider.generateToken(authentication);
-        return new AuthResponse(authToken, loginRequest.getUsername());
+        String refreshToken = refreshTokenService.generateRefreshToken().getToken();
+        return new AuthResponse(authToken,
+                loginRequest.getUsername(),
+                refreshToken,
+                Instant.now().plusMillis(jwtProvider.getJwtExpirationMillis()));
+    }
+
+    public AuthResponse refreshToken(RefreshTokenRequest request) {
+        refreshTokenService.validateToken(request.getRefreshToken());
+        String token = jwtProvider.generateTokenWithUsername(request.getUsername());
+        return new AuthResponse(
+                token,
+                request.getUsername(),
+                refreshTokenService.generateRefreshToken().getToken(),
+                Instant.now().plusMillis(jwtProvider.getJwtExpirationMillis())
+        );
     }
 
     private String encodePassword(String password) {
